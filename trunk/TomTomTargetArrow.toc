@@ -2,7 +2,7 @@
 ## Title: TomTomTargetArrow
 ## Author: Bloodyhelln / Phelaan
 ## Notes: Uses TomTom to show target location if target is in party or raid.
-## Version: 0.3
+## Version: 0.5
 ## X-Category: Interface Enhancements 
 
 TomTomTargetArrow.xml
