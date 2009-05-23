@@ -226,7 +226,7 @@ function ttta_OnUpdate(self, elapsed)
 				TomTom:ReleaseCrazyArrow();
 			end
 			
-			if (calibrater.Visible) then
+			if (calibrator.Visible) then
 				Calibrate(px,py, tx,ty);
 			end
 		end
