@@ -3,7 +3,7 @@
 ## Author: Bloodyhelln / Phelaan
 ## Notes: Uses TomTom to show target location if target is in party or raid.
 ## SavedVariables: TTTA_VAR
-## Dependencies: TomTom r216+
+## Dependencies: TomTom
 ## Version: r14
 ## X-Embeds: Ace3
 ## X-Category: Map, Pvp, Battleground, Healer
