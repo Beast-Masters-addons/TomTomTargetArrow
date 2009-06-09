@@ -31,6 +31,10 @@ local defaults = {
 		["height"] = 469.4752924913463,
 		["width"] = 9977.01041426628,
 	},
+	["Ulduar_0"] = {
+		["height"] = 2045.933337601483,
+		["width"] = 3071.259553513405,
+	},
 }
 
 local db;
@@ -44,6 +48,7 @@ local playerName = "";
 
 local defaultGroupTexture = "Interface\\Addons\\TomTomTargetArrow\\Artwork\\Normal";
 local targetTexture = "Interface\\Addons\\TomTomTargetArrow\\Artwork\\Target";
+local stickTexture = "Interface\\Addons\\TomTomTargetArrow\\Artwork\\Stick";
 
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS;
 
@@ -122,11 +127,29 @@ end
 
 ---------------------------------------------------------------------------------------------
 -- SLASHCOMMAND STUFF
+local doStick = false;
+local target = "target";
 
 function TTTA_SlashCommand(msg)
-	--DEFAULT_CHAT_FRAME:AddMessage("ttta Slash");
-	--CalibrateNow()
-	calibrator:Show();
+	--calibrator:Show();
+	local arg1, arg2, arg3, arg4;
+    
+
+	if (msg) then
+		args = GetWords(msg, "^ *([^%s]+) *");
+        	
+		if (args[1] == "stick" and UnitName("target") ~= nil) then
+			doStick = true;
+			DEFAULT_CHAT_FRAME:AddMessage( "Stick on");
+			target = UnitName("target");
+		elseif (args[1] == "unstick") then
+			doStick = false;
+			DEFAULT_CHAT_FRAME:AddMessage( "Stick off");
+			target = "target";
+		elseif (args[1] == "calibrate") then
+			calibrator:Show();
+		end
+	end
 end
 
 function CalibrateNow()
@@ -175,6 +198,7 @@ function ttta:OnInitialize()
 
 	self:RegisterEvent("PLAYER_TARGET_CHANGED", ttta_Player_Target_Changed);
 	--self:RegisterEvent("ZONE_CHANGED", ttta_Zone_Changed);
+	--self:RegisterEvent("PARTY_MEMBERS_CHANGED", ttta_Party_Menbers_Changed);
 	TomTomTargetArrow:SetScript("OnUpdate", ttta_OnUpdate);	
 	
 	updateCounter = 0;
@@ -183,18 +207,29 @@ function ttta:OnInitialize()
 	InitCalibratorFrame()
 end
 
+local currentTarget;
 function ttta_Player_Target_Changed()
-	if (not UnitPlayerOrPetInParty("target") and not UnitPlayerOrPetInRaid("target")) then
+	if (not UnitPlayerOrPetInParty(target) and not UnitPlayerOrPetInRaid(target)) then
+		TomTom:ReleaseCrazyArrow();
+		xScale:SetText("");
+		xScale.Value = nil;
+		yScale:SetText("");
+		yScale.Value = nil;
+	else
+		currentTarget = UnitName("target");
+	end
+	
+end
+
+function ttta_Zone_Changed()
+	--DEFAULT_CHAT_FRAME:AddMessage(GetMapInfo() .. "_" .. GetCurrentMapDungeonLevel());
+	if (not UnitPlayerOrPetInParty(target) and not UnitPlayerOrPetInRaid(target)) then
 		TomTom:ReleaseCrazyArrow();
 		xScale:SetText("");
 		xScale.Value = nil;
 		yScale:SetText("");
 		yScale.Value = nil;
 	end
-end
-
-function ttta_Zone_Changed()
-	--DEFAULT_CHAT_FRAME:AddMessage(GetMapInfo() .. "_" .. GetCurrentMapDungeonLevel());
 end
 
 function ttta_OnUpdate(self, elapsed)
@@ -204,23 +239,24 @@ function ttta_OnUpdate(self, elapsed)
 
 		pc,pz,px,py = Astrolabe:GetCurrentPlayerPosition();
 
-		targetName = UnitName("target");
+		targetName = UnitName(target);
 		
 		HighlightTargetOnMap(targetName);
 
-		if ((UnitPlayerOrPetInParty("target") or UnitPlayerOrPetInRaid("target")) and targetName ~= playerName) then
+		if ((UnitPlayerOrPetInParty(target) or UnitPlayerOrPetInRaid(target)) and targetName ~= playerName) then
 			
-			tc,tz,tx,ty = Astrolabe:GetUnitPosition("target", true)
+			tc,tz,tx,ty = Astrolabe:GetUnitPosition(target, true)
 
 			if (px and py and tx and ty ~= nil) then
-				-- TODO: Fix ajustment when player and target are en different zones but on same continent.
 				UpdateTomTomArrow(px, py, tx, ty);
 				
-				--inInstance, instanceType = IsInInstance();
-				--if (inInstance == 1) then
 				dist, dx, dy = ComputeDistance( pc, pz, px, py, tc, tz, tx, ty )
     				if (dist) then
-					TomTom:SetCrazyArrowTitle(floor(dist).." yards");
+					if (doStick) then
+						TomTom:SetCrazyArrowTitle("Sticky:"..target, floor(dist).." yards");
+					else
+						TomTom:SetCrazyArrowTitle(UnitName("target"), floor(dist).." yards");
+					end
 				else
 					TomTom:SetCrazyArrowTitle("");
 				end
@@ -230,9 +266,9 @@ function ttta_OnUpdate(self, elapsed)
 				TomTom:ReleaseCrazyArrow();
 			end
 			
-			if (calibrator.Visible) then
+			--if (calibrator.Visible) then
 				Calibrate(px,py, tx,ty);
-			end
+			--end
 		end
 		updateCounter = 0;
 	end
@@ -240,6 +276,20 @@ end
 
 ------------------------------------------------------------------
 -- Helper functions
+
+function GetWords(str, fs)
+   local ret = {};
+   local pos=0;
+   while(true) do
+     local word;
+     _,pos,word=string.find(str, fs, pos+1);
+     if(not word) then
+       return ret;
+     end
+     word = string.lower(word);
+     table.insert(ret, word);
+   end
+end
 
 function Calibrate(px,py, tx,ty)
 	zoneKey = GetZoneKey();
@@ -363,9 +413,11 @@ function HighlightTargetOnMap(targetName)
 
 			dotFrame.icon:SetTexture(defaultGroupTexture);
 
-			if (targetName == UnitName("Party"..i)) then
+			if (currentTarget == UnitName("Party"..i)) then
 				dotFrame.icon:SetTexture(targetTexture);
-
+			end
+			if (doStick == true and targetName == UnitName("Party"..i)) then
+				dotFrame.icon:SetTexture(stickTexture);
 			end
 		end
 	end
@@ -383,8 +435,11 @@ function HighlightTargetOnMap(targetName)
 
 			dotFrame.icon:SetTexture(defaultGroupTexture);
 
-			if (targetName == UnitName("Raid"..i)) then
+			if (currentTarget == UnitName("Raid"..i)) then
 				dotFrame.icon:SetTexture(targetTexture);
+			end
+			if (doStick == true and targetName == UnitName("Raid"..i)) then
+				dotFrame.icon:SetTexture(stickTexture);
 			end
 		end
 	end
