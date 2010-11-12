@@ -4,7 +4,18 @@ local aceGUI = LibStub("AceGUI-3.0");
 local Astrolabe = DongleStub("Astrolabe-0.4")
 
 -- Variable holding zoneData
-local zoneData = {};
+local zoneData = setmetatable({}, {__index=function(tbl, key)
+	-- check for live data
+	local _,l,t,r,b = GetCurrentMapZone();
+	if (not l) then
+		return;
+	end
+	tbl[key] = {
+		["height"] = l-r,
+		["width"] = t-b,
+	}
+	return tbl[key];
+end});
 
 local defaults = {
 	["ArathiBasin_0"] = {
@@ -209,16 +220,15 @@ end
 
 local currentTarget;
 function ttta_Player_Target_Changed()
-	if (not UnitPlayerOrPetInParty(target) and not UnitPlayerOrPetInRaid(target)) then
+	if (UnitGUID("target") == UnitGUID("player") or (not UnitPlayerOrPetInParty(target) and not UnitPlayerOrPetInRaid(target))) then
 		TomTom:ReleaseCrazyArrow();
 		xScale:SetText("");
 		xScale.Value = nil;
 		yScale:SetText("");
 		yScale.Value = nil;
-	else
-		currentTarget = UnitName("target");
 	end
 	
+	currentTarget = UnitName("target");
 end
 
 function ttta_Zone_Changed()
@@ -401,7 +411,8 @@ end
 function HighlightTargetOnMap(targetName)
 
 	for i=1, MAX_PARTY_MEMBERS, 1 do
-
+		if UnitExists("party"..i) then
+		
 		local dotFrame = getglobal("WorldMapParty"..i);
 
 		if (dotFrame ~= nil) then
@@ -411,6 +422,8 @@ function HighlightTargetOnMap(targetName)
 				dotFrame.icon:SetVertexColor(t.r, t.g, t.b)
 			end
 
+			dotFrame.icon:SetTexCoord(0, 1, 0, 1);
+			dotFrame.icon.SetTexCoord = function() end
 			dotFrame.icon:SetTexture(defaultGroupTexture);
 
 			if (currentTarget == UnitName("Party"..i)) then
@@ -419,6 +432,8 @@ function HighlightTargetOnMap(targetName)
 			if (doStick == true and targetName == UnitName("Party"..i)) then
 				dotFrame.icon:SetTexture(stickTexture);
 			end
+		end
+		
 		end
 	end
 
@@ -433,6 +448,8 @@ function HighlightTargetOnMap(targetName)
 				dotFrame.icon:SetVertexColor(t.r, t.g, t.b)
 			end
 
+			dotFrame.icon:SetTexCoord(0, 1, 0, 1);
+			dotFrame.icon.SetTexCoord = function() end
 			dotFrame.icon:SetTexture(defaultGroupTexture);
 
 			if (currentTarget == UnitName("Raid"..i)) then

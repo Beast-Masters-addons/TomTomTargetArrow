@@ -1,4 +1,4 @@
-## Interface: 30100
+## Interface: 40000
 ## Title: TomTomTargetArrow
 ## Author: Bloodyhelln / Phelaan
 ## Notes: Uses TomTom to show target location if target is in party or raid.
