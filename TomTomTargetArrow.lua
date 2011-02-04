@@ -1,7 +1,7 @@
 local ttta = LibStub("AceAddon-3.0"):NewAddon("ttta", "AceConsole-3.0", "AceEvent-3.0")
 local aceGUI = LibStub("AceGUI-3.0");
 
-local Astrolabe = DongleStub("Astrolabe-0.4")
+local Astrolabe = DongleStub("Astrolabe-1.0")
 
 -- Variable holding zoneData
 local zoneData = setmetatable({}, {__index=function(tbl, key)
