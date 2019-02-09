@@ -157,6 +157,8 @@ function TTTA_SlashCommand(msg)
 			doStick = false;
 			DEFAULT_CHAT_FRAME:AddMessage( "Stick off");
 			target = "target";
+			-- Release arrow in case there is no target
+			TomTom:ReleaseCrazyArrow();
 		elseif (args[1] == "calibrate") then
 			calibrator:Show();
 		end
@@ -257,7 +259,7 @@ function ttta_OnUpdate(self, elapsed)
 
 		if ((UnitPlayerOrPetInParty(target) or UnitPlayerOrPetInRaid(target)) and targetName ~= playerName) then
 			
-			tx, ty, target_instance = HBD:GetUnitWorldPosition("target")
+			tx, ty, target_instance = HBD:GetUnitWorldPosition(target)
 			if (target_instance ~= player_instance) then
 				-- print("Player and target is not in the same instance", player_instance, target_instance)
 				return
