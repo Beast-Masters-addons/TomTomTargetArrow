@@ -2,7 +2,6 @@
 ## Title: TomTom group member arrow
 ## Author: Bloodyhelln / Phelaan / datagutten
 ## Notes: Uses TomTom to show target location if target is in party or raid.
-## SavedVariables: TTTA_VAR
 ## Dependencies: TomTom
 ## Version: r15
 ## X-Embeds: Ace3
