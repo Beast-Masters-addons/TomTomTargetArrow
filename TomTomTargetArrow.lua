@@ -1,7 +1,7 @@
+local HBD = LibStub("HereBeDragons-2.0")
 local ttta = LibStub("AceAddon-3.0"):NewAddon("ttta", "AceConsole-3.0", "AceEvent-3.0")
 local aceGUI = LibStub("AceGUI-3.0");
 
-local Astrolabe = DongleStub("Astrolabe-1.0")
 
 -- Variable holding zoneData
 local zoneData = setmetatable({}, {__index=function(tbl, key)
@@ -242,25 +242,31 @@ function ttta_Zone_Changed()
 	end
 end
 
+local player_instance, px, py, tx, ty
 function ttta_OnUpdate(self, elapsed)
+	local dist, dx, dy, target_instance
 	updateCounter = updateCounter + elapsed;
 
 	if (updateCounter >= updateFrequency) then
+		px, py, player_instance = HBD:GetPlayerWorldPosition()
 
-		pc,pz,px,py = Astrolabe:GetCurrentPlayerPosition();
 
-		targetName = UnitName(target);
+		local targetName = UnitName(target);
 		
 		HighlightTargetOnMap(targetName);
 
 		if ((UnitPlayerOrPetInParty(target) or UnitPlayerOrPetInRaid(target)) and targetName ~= playerName) then
 			
-			tc,tz,tx,ty = Astrolabe:GetUnitPosition(target, true)
+			tx, ty, target_instance = HBD:GetUnitWorldPosition("target")
+			if (target_instance ~= player_instance) then
+				-- print("Player and target is not in the same instance", player_instance, target_instance)
+				return
+			end
 
 			if (px and py and tx and ty ~= nil) then
 				UpdateTomTomArrow(px, py, tx, ty);
 				
-				dist, dx, dy = ComputeDistance( pc, pz, px, py, tc, tz, tx, ty )
+				dist, dx, dy = HBD:GetWorldDistance(player_instance, px, py, tx, ty)
     				if (dist) then
 					if (doStick) then
 						TomTom:SetCrazyArrowTitle("Sticky:"..target, floor(dist).." yards");
@@ -277,7 +283,7 @@ function ttta_OnUpdate(self, elapsed)
 			end
 			
 			--if (calibrator.Visible) then
-				Calibrate(px,py, tx,ty);
+				-- Calibrate(px,py, tx,ty);
 			--end
 		end
 		updateCounter = 0;
@@ -356,29 +362,6 @@ function GetZoneKey()
 	return map.."_"..level;
 end
 
-
-function ComputeDistance(pc, pz, px, py, tc, tz, tx, ty)
-	local dist, dx, dy;
-	
-	if (pc == -1 and pz == 0 and tc == -1 and tz == 0) then
-		-- Both player and target is in an instance (hopefully the same)
-		zd = zoneData[GetZoneKey()];
-		if (zd) then
-			if (zd.height and zd.width) then
-				-- If we have both a height and width for the zone, then we calculate distance
-				dx = (px - tx) * zd.width;
-				dy = (py - ty) * zd.height;
-				if ( dx and dy ) then
-					dist = sqrt(dx*dx + dy*dy);
-				end
-			end
-		end
-	else
-		dist, dx, dy = Astrolabe:ComputeDistance( pc, pz, px, py, tc, tz, tx, ty )
-	end
-	return dist, dx, dy;
-end
-
 function UpdateTomTomArrow(px, py, tx, ty)
 	if not TomTom:CrazyArrowIsHijacked() then
 		TomTom:HijackCrazyArrow(UpdateArrow())
@@ -388,28 +371,15 @@ function UpdateTomTomArrow(px, py, tx, ty)
 end
 
 function UpdateArrow(self, elapsed)
-	angle = GetAngle(px, py, tx, ty);
-	TomTom:SetCrazyArrowDirection(angle);
-end
 
-function GetAngle(px, py, tx, ty)
-	angle = math.atan2(tx - px, py - ty) 
-	if (angle < 0) then
-		angle = (math.pi * 2) + angle
-	end
+	local angle, distance = HBD:GetWorldVector(player_instance, px, py, tx, ty)
+	local arrow_angle = GetPlayerFacing() - angle
+	arrow_angle = -arrow_angle
 
-	facingRadians = -GetPlayerFacing();
-	angle = facingRadians - angle;
-
-	if (angle < 0) then
-		angle = (math.pi * 2) + angle
-	end
-
-	return angle
+	TomTom:SetCrazyArrowDirection(arrow_angle);
 end
 
 function HighlightTargetOnMap(targetName)
-
 	for i=1, MAX_PARTY_MEMBERS, 1 do
 		if UnitExists("party"..i) then
 		

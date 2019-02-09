@@ -1,10 +1,10 @@
-## Interface: 40000
+## Interface: 80100
 ## Title: TomTomTargetArrow
-## Author: Bloodyhelln / Phelaan
+## Author: Bloodyhelln / Phelaan / datagutten
 ## Notes: Uses TomTom to show target location if target is in party or raid.
 ## SavedVariables: TTTA_VAR
 ## Dependencies: TomTom
-## Version: r14
+## Version: r15
 ## X-Embeds: Ace3
 ## X-Category: Map, Pvp, Battleground, Healer
 
