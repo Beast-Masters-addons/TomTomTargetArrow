@@ -103,16 +103,6 @@ function InitCalibratorFrame()
 	group:SetFullWidth(true);
 end
 
-function DebugWriteZoneData(tbl)
-	for k, zone in pairs(tbl) do 
-		print(k)
-		for k, zd in pairs(zone) do
-			print(k, zd);
-		end
-	end
-
-end
-
 function DiffGroup(label, button)
 	group = aceGUI:Create("SimpleGroup");
 	group:SetLayout("Flow");
@@ -161,6 +151,10 @@ function TTTA_SlashCommand(msg)
 			TomTom:ReleaseCrazyArrow();
 		elseif (args[1] == "calibrate") then
 			calibrator:Show();
+		elseif (args[1] == "debug") then
+			print('HBD player: ', HBD:GetUnitWorldPosition("player"))
+			print('HBD target: ', HBD:GetUnitWorldPosition("target"))
+			print('UnitPosition', UnitPosition("player"))
 		end
 	end
 end
