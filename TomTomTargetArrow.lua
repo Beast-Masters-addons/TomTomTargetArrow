@@ -21,9 +21,6 @@ local doStick = false;
 local target = "target";
 
 function TTTA_SlashCommand(msg)
-	local arg1, arg2, arg3, arg4;
-    
-
 	if (msg) then
 		args = GetWords(msg, "^ *([^%s]+) *");
         	
