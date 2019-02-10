@@ -15,13 +15,6 @@ local stickTexture = "Interface\\Addons\\TomTomTargetArrow\\Artwork\\Stick";
 
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS;
 
--- Reference objects to x and y scale labels.
-local xScale;
-local yScale;
-
-
-
-
 ---------------------------------------------------------------------------------------------
 -- SLASHCOMMAND STUFF
 local doStick = false;
@@ -75,10 +68,6 @@ local currentTarget;
 function ttta_Player_Target_Changed()
 	if (UnitGUID("target") == UnitGUID("player") or (not UnitPlayerOrPetInParty(target) and not UnitPlayerOrPetInRaid(target))) then
 		TomTom:ReleaseCrazyArrow();
-		xScale:SetText("");
-		xScale.Value = nil;
-		yScale:SetText("");
-		yScale.Value = nil;
 	end
 	
 	currentTarget = UnitName("target");
@@ -88,10 +77,6 @@ function ttta_Zone_Changed()
 	--DEFAULT_CHAT_FRAME:AddMessage(GetMapInfo() .. "_" .. GetCurrentMapDungeonLevel());
 	if (not UnitPlayerOrPetInParty(target) and not UnitPlayerOrPetInRaid(target)) then
 		TomTom:ReleaseCrazyArrow();
-		xScale:SetText("");
-		xScale.Value = nil;
-		yScale:SetText("");
-		yScale.Value = nil;
 	end
 end
 
@@ -134,10 +119,6 @@ function ttta_OnUpdate(self, elapsed)
 				-- in which case we release the arrow.
 				TomTom:ReleaseCrazyArrow();
 			end
-			
-			--if (calibrator.Visible) then
-				-- Calibrate(px,py, tx,ty);
-			--end
 		end
 		updateCounter = 0;
 	end
