@@ -1,13 +1,19 @@
 local HBD = LibStub("HereBeDragons-2.0")
-local ttta = LibStub("AceAddon-3.0"):NewAddon("ttta", "AceConsole-3.0", "AceEvent-3.0")
+-- local ttta = LibStub("AceAddon-3.0"):NewAddon("ttta", "AceConsole-3.0", "AceEvent-3.0")
+
+local frame = CreateFrame("FRAME", "TomTomTargetArrowFrame");
+frame:RegisterEvent("PLAYER_TARGET_CHANGED")
+frame:RegisterEvent("GROUP_JOINED");
+frame:RegisterEvent("GROUP_LEFT")
 
 
 ---------------------------------------------------------------------------------------------
 -- Variables
 
-local updatecounter = 0;
+local updateCounter = 0;
 local updateFrequency = 0.05;
-local playerName = "";
+local playerName = UnitName("player");
+local in_group = false
 
 local defaultGroupTexture = "Interface\\Addons\\TomTomTargetArrow\\Artwork\\Normal";
 local targetTexture = "Interface\\Addons\\TomTomTargetArrow\\Artwork\\Target";
@@ -51,15 +57,15 @@ SlashCmdList["TomTomTargetArrow"] = TTTA_SlashCommand;
 -- EVENTS
 
 
-function ttta:OnInitialize()
-	self:RegisterEvent("PLAYER_TARGET_CHANGED", ttta_Player_Target_Changed);
+--function ttta:OnInitialize()
+--	self:RegisterEvent("PLAYER_TARGET_CHANGED", ttta_Player_Target_Changed);
 	--self:RegisterEvent("ZONE_CHANGED", ttta_Zone_Changed);
 	--self:RegisterEvent("PARTY_MEMBERS_CHANGED", ttta_Party_Menbers_Changed);
-	TomTomTargetArrow:SetScript("OnUpdate", ttta_OnUpdate);	
+--	TomTomTargetArrow:SetScript("OnUpdate", ttta_OnUpdate);
 	
-	updateCounter = 0;
-	playerName = UnitName("player");
-end
+--	updateCounter = 0;
+--	playerName = UnitName("player");
+-- end
 
 local currentTarget;
 function ttta_Player_Target_Changed()
@@ -70,15 +76,18 @@ function ttta_Player_Target_Changed()
 	currentTarget = UnitName("target");
 end
 
-function ttta_Zone_Changed()
+--function ttta_Zone_Changed()
 	--DEFAULT_CHAT_FRAME:AddMessage(GetMapInfo() .. "_" .. GetCurrentMapDungeonLevel());
-	if (not UnitPlayerOrPetInParty(target) and not UnitPlayerOrPetInRaid(target)) then
-		TomTom:ReleaseCrazyArrow();
-	end
-end
+--	if (not UnitPlayerOrPetInParty(target) and not UnitPlayerOrPetInRaid(target)) then
+--		TomTom:ReleaseCrazyArrow();
+--	end
+--end
 
 local player_instance, px, py, tx, ty
-function ttta_OnUpdate(self, elapsed)
+function update_position (self, elapsed)
+	if not in_group then
+		return
+	end
 	local dist, dx, dy, target_instance
 	updateCounter = updateCounter + elapsed;
 
@@ -208,3 +217,17 @@ function HighlightTargetOnMap(targetName)
 	end
 
 end
+
+frame:SetScript("OnEvent", function(self, event,...)
+	if event == 'PLAYER_TARGET_CHANGED' then
+		ttta_Player_Target_Changed()
+	end
+	if event == 'GROUP_LEFT' then
+		in_group = false
+		frame:SetScript("OnUpdate", nil)
+	elseif event == 'GROUP_JOINED' then
+		in_group = true
+		frame:SetScript("OnUpdate", update_position)
+	end
+
+end)
