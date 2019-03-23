@@ -4,6 +4,6 @@
 ## Notes: Uses TomTom to show target location if target is in party or raid.
 ## Dependencies: TomTom
 ## Version: r16
-## X-Category: Map, Pvp, Battleground, Healer
+## X-Category: Map
 
 TomTomTargetArrow.lua
