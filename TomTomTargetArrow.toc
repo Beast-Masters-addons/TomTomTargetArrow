@@ -1,4 +1,4 @@
-## Interface: 80100
+## Interface: 80200
 ## Title: TomTom group member arrow
 ## Author: Bloodyhelln / Phelaan / datagutten
 ## Notes: Uses TomTom to show target location if target is in party or raid.
