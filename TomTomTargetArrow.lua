@@ -29,7 +29,7 @@ local target = "target";
 function TTTA_SlashCommand(msg)
 	if (msg) then
 		args = GetWords(msg, "^ *([^%s]+) *");
-        	
+
 		if (args[1] == "stick" and UnitName("target") ~= nil) then
 			doStick = true;
 			DEFAULT_CHAT_FRAME:AddMessage( "Stick on");
@@ -62,7 +62,7 @@ SlashCmdList["TomTomTargetArrow"] = TTTA_SlashCommand;
 	--self:RegisterEvent("ZONE_CHANGED", ttta_Zone_Changed);
 	--self:RegisterEvent("PARTY_MEMBERS_CHANGED", ttta_Party_Menbers_Changed);
 --	TomTomTargetArrow:SetScript("OnUpdate", ttta_OnUpdate);
-	
+
 --	updateCounter = 0;
 --	playerName = UnitName("player");
 -- end
@@ -72,7 +72,7 @@ function ttta_Player_Target_Changed()
 	if (UnitGUID("target") == UnitGUID("player") or (not UnitPlayerOrPetInParty(target) and not UnitPlayerOrPetInRaid(target))) then
 		TomTom:ReleaseCrazyArrow();
 	end
-	
+
 	currentTarget = UnitName("target");
 end
 
@@ -96,11 +96,11 @@ function update_position (self, elapsed)
 
 
 		local targetName = UnitName(target);
-		
+
 		HighlightTargetOnMap(targetName);
 
 		if ((UnitPlayerOrPetInParty(target) or UnitPlayerOrPetInRaid(target)) and targetName ~= playerName) then
-			
+
 			tx, ty, target_instance = HBD:GetUnitWorldPosition(target)
 			if (target_instance ~= player_instance) then
 				-- print("Player and target is not in the same instance", player_instance, target_instance)
@@ -109,9 +109,9 @@ function update_position (self, elapsed)
 
 			if (px and py and tx and ty ~= nil) then
 				UpdateTomTomArrow(px, py, tx, ty);
-				
+
 				dist, dx, dy = HBD:GetWorldDistance(player_instance, px, py, tx, ty)
-    				if (dist) then
+				if (dist) then
 					if (doStick) then
 						TomTom:SetCrazyArrowTitle("Sticky:"..target, floor(dist).." yards");
 					else
@@ -167,7 +167,7 @@ end
 function HighlightTargetOnMap(targetName)
 	for i=1, MAX_PARTY_MEMBERS, 1 do
 		if UnitExists("party"..i) then
-		
+
 		local dotFrame = getglobal("WorldMapParty"..i);
 
 		if (dotFrame ~= nil) then
@@ -188,7 +188,6 @@ function HighlightTargetOnMap(targetName)
 				dotFrame.icon:SetTexture(stickTexture);
 			end
 		end
-		
 		end
 	end
 
