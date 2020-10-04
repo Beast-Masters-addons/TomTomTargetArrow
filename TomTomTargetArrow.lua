@@ -69,7 +69,8 @@ SlashCmdList["TomTomTargetArrow"] = TTTA_SlashCommand;
 
 local currentTarget;
 function ttta_Player_Target_Changed()
-	if (UnitGUID("target") == UnitGUID("player") or (not UnitPlayerOrPetInParty(target) and not UnitPlayerOrPetInRaid(target))) then
+	if (UnitGUID("target") == UnitGUID("player") or
+			(not UnitPlayerOrPetInParty(target) and not UnitPlayerOrPetInRaid(target))) then
 		TomTom:ReleaseCrazyArrow();
 	end
 
@@ -84,11 +85,11 @@ end
 --end
 
 local player_instance, px, py, tx, ty
-function update_position (self, elapsed)
+function update_position (_, elapsed)
 	if not in_group then
 		return
 	end
-	local dist, dx, dy, target_instance
+	local target_instance
 	updateCounter = updateCounter + elapsed;
 
 	if (updateCounter >= updateFrequency) then
@@ -108,9 +109,9 @@ function update_position (self, elapsed)
 			end
 
 			if (px and py and tx and ty ~= nil) then
-				UpdateTomTomArrow(px, py, tx, ty);
+				UpdateTomTomArrow();
 
-				dist, dx, dy = HBD:GetWorldDistance(player_instance, px, py, tx, ty)
+				local dist = HBD:GetWorldDistance(player_instance, px, py, tx, ty)
 				if (dist) then
 					if (doStick) then
 						TomTom:SetCrazyArrowTitle("Sticky:"..target, floor(dist).." yards");
@@ -147,7 +148,7 @@ function GetWords(str, fs)
    end
 end
 
-function UpdateTomTomArrow(px, py, tx, ty)
+function UpdateTomTomArrow()
 	if not TomTom:CrazyArrowIsHijacked() then
 		TomTom:HijackCrazyArrow(UpdateArrow())
 	end
@@ -155,9 +156,9 @@ function UpdateTomTomArrow(px, py, tx, ty)
 	UpdateArrow(self, elapsed);
 end
 
-function UpdateArrow(self, elapsed)
+function UpdateArrow()
 
-	local angle, distance = HBD:GetWorldVector(player_instance, px, py, tx, ty)
+	local angle = HBD:GetWorldVector(player_instance, px, py, tx, ty)
 	local arrow_angle = GetPlayerFacing() - angle
 	arrow_angle = -arrow_angle
 
@@ -217,7 +218,7 @@ function HighlightTargetOnMap(targetName)
 
 end
 
-frame:SetScript("OnEvent", function(self, event,...)
+frame:SetScript("OnEvent", function(_, event)
 	if event == 'PLAYER_TARGET_CHANGED' then
 		ttta_Player_Target_Changed()
 	end
