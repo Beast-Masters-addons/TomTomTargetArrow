@@ -8,7 +8,7 @@
 ## Author: Bloodyhelln / Phelaan / datagutten
 ## Notes: Uses TomTom to show target location if target is in party or raid.
 ## Dependencies: TomTom
-## Version: r16
+## Version: @project-version@
 ## X-Category: Map
 ## X-Curse-Project-ID: 313741
 
