@@ -11,5 +11,6 @@
 ## Version: @project-version@
 ## X-Category: Map
 ## X-Curse-Project-ID: 313741
+## X-WoWI-ID: 25895
 
 TomTomTargetArrow.lua
