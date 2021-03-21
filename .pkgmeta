@@ -1,1 +1,13 @@
 package-as: TomTomTargetArrow
+externals:
+  libs/LibStub:
+    url: https://repos.wowace.com/wow/libstub/trunk
+    tag: latest
+
+  libs/HereBeDragons:
+    url: https://repos.curseforge.com/wow/herebedragons
+    tag: 2.05-release
+
+  libs/CallbackHandler:
+    url: https://repos.wowace.com/wow/callbackhandler/trunk/CallbackHandler-1.0
+    tag: 1.0.8

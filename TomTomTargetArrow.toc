@@ -13,4 +13,10 @@
 ## X-Curse-Project-ID: 313741
 ## X-WoWI-ID: 25895
 
+#@no-lib-strip@
+libs\LibStub\LibStub.lua
+libs\CallbackHandler\CallbackHandler-1.0.xml
+libs\HereBeDragons\HereBeDragons-2.0.lua
+#@end-no-lib-strip@
+
 TomTomTargetArrow.lua
