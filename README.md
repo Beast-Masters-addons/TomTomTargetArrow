@@ -8,7 +8,7 @@ This is a continuation of the abandoned plugin [TomTomTargetArrow][old]
 ## Dependencies
 As the name indicates, [TomTom][tomtom] must be installed for this addon to work.
 
-[HereBeDragons][hbd] is used to aquire player positions and do distance calculations, but since TomTom also depends on it, there is no need to install it separately.
+[HereBeDragons][hbd] is used to aquire player positions and do distance calculations. It is included in the package.
 
 
 ## Slash commands
