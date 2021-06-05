@@ -5,7 +5,7 @@ externals:
     tag: latest
 
   libs/HereBeDragons:
-    url: https://repos.curseforge.com/wow/herebedragons
+    url: https://github.com/Nevcairiel/HereBeDragons
     tag: 2.05-release
 
   libs/CallbackHandler:
