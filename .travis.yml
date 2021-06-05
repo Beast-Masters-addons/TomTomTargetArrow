@@ -3,13 +3,16 @@ language: minimal
 jobs:
   include:
     - name: 'Retail'
-      script:
-        - curl -s https://raw.githubusercontent.com/BigWigsMods/packager/master/release.sh | bash
+      before_install:
+        - export GAME_VERSION="retail"
 
     - name: 'Classic'
-      script:
-        - export CLASSIC_VERSION="1.13.6"
-        - curl -s https://raw.githubusercontent.com/BigWigsMods/packager/master/release.sh | bash -s -- -g $CLASSIC_VERSION
+      before_install:
+        - export GAME_VERSION="classic"
+
+    - name: 'TBC'
+      before_install:
+        - export GAME_VERSION="bcc"
 
 addons:
   apt:
@@ -19,9 +22,7 @@ addons:
 install: luarocks install --local luacheck
 
 before_script:
-  - /home/travis/.luarocks/bin/luacheck . --no-color -q -g
+  - /home/travis/.luarocks/bin/luacheck . --no-color -q
 
-notifications:
-  email:
-    on_success: never
-    on_failure: always
+script:
+  - curl -s https://raw.githubusercontent.com/BigWigsMods/packager/master/release.sh | bash -s -- -g $GAME_VERSION
