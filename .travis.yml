@@ -22,7 +22,7 @@ addons:
 install: luarocks install --local luacheck
 
 before_script:
-  - /home/travis/.luarocks/bin/luacheck . --no-color -q
+  - /home/travis/.luarocks/bin/luacheck TomTomTargetArrow.lua -g --no-color -q
 
 script:
   - curl -s https://raw.githubusercontent.com/BigWigsMods/packager/master/release.sh | bash -s -- -g $GAME_VERSION
