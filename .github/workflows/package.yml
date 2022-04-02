@@ -1,0 +1,48 @@
+name: Test and package
+
+on:
+  push:
+    branches: [ master ]
+    tags:
+      - '**'
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        game_version: [ 'classic', 'bcc', 'retail' ]
+
+    env:
+      CF_API_KEY: ${{ secrets.CF_API_KEY }}
+      WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
+      GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install lua dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install luarocks
+          sudo luarocks install luacheck
+
+      - name: Run luacheck
+        run: |
+          luacheck -g TomTomTargetArrow.lua
+
+      - name: WoW Packager
+        uses: BigWigsMods/packager@v1.0.1
+        with:
+          args: -g ${{ matrix.game_version }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.game_version }}
+          path: .release
