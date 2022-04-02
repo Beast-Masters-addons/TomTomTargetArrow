@@ -9,6 +9,7 @@
 ## X-Category: Map
 ## X-Curse-Project-ID: 313741
 ## X-WoWI-ID: 25895
+## X-Wago-ID: qv63zZNb
 
 #@no-lib-strip@
 libs\LibStub\LibStub.lua
