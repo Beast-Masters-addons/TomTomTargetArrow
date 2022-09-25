@@ -14,10 +14,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        game_version: [ 'classic', 'bcc', 'retail' ]
 
     env:
       CF_API_KEY: ${{ secrets.CF_API_KEY }}
@@ -39,11 +35,9 @@ jobs:
           luacheck -g TomTomTargetArrow.lua
 
       - name: WoW Packager
-        uses: BigWigsMods/packager@v1.0.1
-        with:
-          args: -g ${{ matrix.game_version }}
+        uses: BigWigsMods/packager@v2.0.11
 
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.game_version }}
+          name: TomTomTargetArrow
           path: .release

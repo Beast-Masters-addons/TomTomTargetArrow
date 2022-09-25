@@ -11,3 +11,9 @@ externals:
   libs/CallbackHandler:
     url: https://repos.wowace.com/wow/callbackhandler/trunk/CallbackHandler-1.0
     tag: 1.0.8
+
+ignore:
+  - libs/LibStub/tests
+  - get_libs.sh
+
+enable-toc-creation: yes

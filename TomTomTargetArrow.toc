@@ -1,6 +1,7 @@
-## Interface-Retail: 90200
-## Interface-Classic: 11402
+## Interface: 90207
+## Interface-Classic: 11403
 ## Interface-BCC: 20504
+## Interface-Wrath: 30400
 ## Title: TomTom group member arrow
 ## Author: Bloodyhelln / Phelaan / datagutten
 ## Notes: Uses TomTom to show target location if target is in party or raid.
