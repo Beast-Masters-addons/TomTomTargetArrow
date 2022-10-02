@@ -157,9 +157,12 @@ function UpdateTomTomArrow()
 end
 
 function UpdateArrow()
-
+	local facing = GetPlayerFacing()
+	if facing == nil then
+		return -- TODO: Hide arrow?
+	end
 	local angle = HBD:GetWorldVector(player_instance, px, py, tx, ty)
-	local arrow_angle = GetPlayerFacing() - angle
+	local arrow_angle = facing - angle
 	arrow_angle = -arrow_angle
 
 	TomTom:SetCrazyArrowDirection(arrow_angle);
