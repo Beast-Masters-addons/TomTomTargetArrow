@@ -18,5 +18,5 @@ As the name indicates, [TomTom][tomtom] must be installed for this addon to work
 
 
 [old]: https://www.wowace.com/projects/tomtomtargetarrow
-[tomtom]: https://www.curseforge.com/wow/addons/tomtom
+[tomtom]: https://addons.wago.io/addons/tomtom
 [hbd]: https://www.wowace.com/projects/herebedragons
