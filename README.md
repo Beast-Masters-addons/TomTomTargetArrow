@@ -1,6 +1,6 @@
 # TomTom group member arrow
 
-A TomTom Crazy Arrow will point and show distance to your fellow players in same party or raid as you.
+A TomTom Crazy Arrow will point and show the distance to your fellow players in same party or raid as you.
 This only works in the open world, Blizzard does not allow positioning inside dungeons and raids.
 
 This is a continuation of the abandoned plugin [TomTomTargetArrow][old]
