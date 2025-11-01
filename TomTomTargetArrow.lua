@@ -165,7 +165,12 @@ function UpdateArrow()
 	local arrow_angle = facing - angle
 	arrow_angle = -arrow_angle
 
-	TomTom:SetCrazyArrowDirection(arrow_angle);
+	local theme = TomTom.CrazyArrowThemeHandler.active.tbl
+	local texture = theme.arrowTexture
+	local left, right, top, bottom = theme.navCoordResolver(arrow_angle)
+	texture:SetTexCoord(left, right, top, bottom)
+
+	--TomTom:SetCrazyArrowDirection(arrow_angle);
 end
 
 function HighlightTargetOnMap(targetName)
