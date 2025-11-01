@@ -1,25 +1,29 @@
-local HBD = LibStub("HereBeDragons-2.0")
--- local ttta = LibStub("AceAddon-3.0"):NewAddon("ttta", "AceConsole-3.0", "AceEvent-3.0")
+local addonName = ...
+local addon = _G.LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceEvent-3.0")
 
-local frame = CreateFrame("FRAME", "TomTomTargetArrowFrame");
-frame:RegisterEvent("PLAYER_TARGET_CHANGED")
-frame:RegisterEvent("GROUP_JOINED");
-frame:RegisterEvent("GROUP_LEFT")
-
+local HBD = _G.LibStub("HereBeDragons-2.0")
 
 ---------------------------------------------------------------------------------------------
 -- Variables
-
-local updateCounter = 0;
-local updateFrequency = 0.05;
-local playerName = UnitName("player");
-local in_group = false
 
 local defaultGroupTexture = "Interface\\Addons\\TomTomTargetArrow\\Artwork\\Normal";
 local targetTexture = "Interface\\Addons\\TomTomTargetArrow\\Artwork\\Target";
 local stickTexture = "Interface\\Addons\\TomTomTargetArrow\\Artwork\\Stick";
 
-local RAID_CLASS_COLORS = RAID_CLASS_COLORS;
+--Global imports
+local UnitName = _G.UnitName
+local UnitGUID = _G.UnitGUID
+local UnitPosition = _G.UnitPosition
+local UnitExists = _G.UnitExists
+local GetPlayerFacing = _G.GetPlayerFacing
+local UnitPlayerOrPetInParty = _G.UnitPlayerOrPetInParty
+local UnitPlayerOrPetInRaid = _G.UnitPlayerOrPetInRaid
+local RAID_CLASS_COLORS = _G.RAID_CLASS_COLORS;
+local MAX_PARTY_MEMBERS = _G.MAX_PARTY_MEMBERS
+local MAX_RAID_MEMBERS = _G.MAX_RAID_MEMBERS
+
+local TomTom = _G.TomTom
+
 
 ---------------------------------------------------------------------------------------------
 -- SLASHCOMMAND STUFF
@@ -55,80 +59,139 @@ SlashCmdList["TomTomTargetArrow"] = TTTA_SlashCommand;
 
 ---------------------------------------------------------------------------------------------
 -- EVENTS
-
-
---function ttta:OnInitialize()
---	self:RegisterEvent("PLAYER_TARGET_CHANGED", ttta_Player_Target_Changed);
-	--self:RegisterEvent("ZONE_CHANGED", ttta_Zone_Changed);
-	--self:RegisterEvent("PARTY_MEMBERS_CHANGED", ttta_Party_Menbers_Changed);
---	TomTomTargetArrow:SetScript("OnUpdate", ttta_OnUpdate);
-
---	updateCounter = 0;
---	playerName = UnitName("player");
--- end
-
-local currentTarget;
-function ttta_Player_Target_Changed()
-	if (UnitGUID("target") == UnitGUID("player") or
-			(not UnitPlayerOrPetInParty(target) and not UnitPlayerOrPetInRaid(target))) then
-		TomTom:ReleaseCrazyArrow();
-	end
-
-	currentTarget = UnitName("target");
+function addon:targetInGroup()
+    if not self.targetName then
+        return false
+    end
+    return UnitPlayerOrPetInParty(self.targetName) or UnitPlayerOrPetInRaid(self.targetName)
 end
 
---function ttta_Zone_Changed()
-	--DEFAULT_CHAT_FRAME:AddMessage(GetMapInfo() .. "_" .. GetCurrentMapDungeonLevel());
---	if (not UnitPlayerOrPetInParty(target) and not UnitPlayerOrPetInRaid(target)) then
---		TomTom:ReleaseCrazyArrow();
---	end
---end
+function addon:OnInitialize()
+    self:RegisterEvent("PLAYER_TARGET_CHANGED")
+    self:RegisterEvent("GROUP_LEFT")
+    self:RegisterEvent("GROUP_JOINED")
+    self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+    self.playerInGroup = _G.UnitInAnyGroup("player")
+    self.targetName = _G.UnitName("target")
+    self.targetIsSelf = true
+    self.metric = TomTom:RegionIsMetric() or false
+end
 
-local player_instance, px, py, tx, ty
-function update_position (_, elapsed)
-	if not in_group then
-		return
-	end
-	local target_instance
-	updateCounter = updateCounter + elapsed;
+function addon:PLAYER_TARGET_CHANGED()
+    self.targetName = UnitName("target")
+    if not self.targetName then
+        self.targetIsSelf = true
+    else
+        self.targetIsSelf = UnitGUID(self.targetName) == UnitGUID("player")
+    end
 
-	if (updateCounter >= updateFrequency) then
-		px, py, player_instance = HBD:GetPlayerWorldPosition()
+    --print("Target", self.targetName, self.targetIsSelf, self:targetInGroup())
 
+    if (self.targetIsSelf or not self:targetInGroup()) then
+        self:disableUpdate()
+    else
+        self:enableUpdate()
+    end
+    HighlightTargetOnMap(self.targetName);
+end
 
-		local targetName = UnitName(target);
+function addon:disableUpdate()
+    TomTom:ReleaseCrazyArrow()
+end
 
-		HighlightTargetOnMap(targetName);
+function addon:enableUpdate()
+    TomTom:HijackCrazyArrow(function()
+        self:update_position()
+    end)
+end
 
-		if ((UnitPlayerOrPetInParty(target) or UnitPlayerOrPetInRaid(target)) and targetName ~= playerName) then
+function addon:GROUP_LEFT()
+    self:UnregisterEvent("PLAYER_TARGET_CHANGED")
+    self.playerInGroup = false
+    self:disableUpdate()
+end
 
-			tx, ty, target_instance = HBD:GetUnitWorldPosition(target)
-			if (target_instance ~= player_instance) then
-				-- print("Player and target is not in the same instance", player_instance, target_instance)
-				return
-			end
+function addon:GROUP_JOINED()
+    self:RegisterEvent("PLAYER_TARGET_CHANGED")
+    self:enableUpdate()
+    self.playerInGroup = true
+end
 
-			if (px and py and tx and ty ~= nil) then
-				UpdateTomTomArrow();
+---Disable updates if unit is in dungeon
+function addon:ZONE_CHANGED_NEW_AREA()
+    if not self.playerInGroup then
+        return
+    end
+    local x, y = UnitPosition("player")
+    if x == y == nil then
+        self:UnregisterEvent("PLAYER_TARGET_CHANGED")
+        self.in_instance = true
+        self:disableUpdate()
+    else
+        self.in_instance = false
+        self:enableUpdate()
+    end
+end
 
-				local dist = HBD:GetWorldDistance(player_instance, px, py, tx, ty)
-				if (dist) then
-					if (doStick) then
-						TomTom:SetCrazyArrowTitle("Sticky:"..target, floor(dist).." yards");
-					else
-						TomTom:SetCrazyArrowTitle(UnitName("target"), floor(dist).." yards");
-					end
-				else
-					TomTom:SetCrazyArrowTitle("");
-				end
-			else
-				-- tx and ty can sometimes become nil if player zones into an instance while targeted
-				-- in which case we release the arrow.
-				TomTom:ReleaseCrazyArrow();
-			end
-		end
-		updateCounter = 0;
-	end
+function addon.setArrowDirection(angle)
+    local facing = GetPlayerFacing()
+    if facing == nil then
+        return
+    end
+
+    local arrow_angle = facing - angle
+    arrow_angle = -arrow_angle
+    if TomTom.CrazyArrowThemeHandler ~= nil then
+        local theme = TomTom.CrazyArrowThemeHandler.active.tbl
+        local texture = theme.arrowTexture
+        local left, right, top, bottom = theme.navCoordResolver(arrow_angle)
+        texture:SetTexCoord(left, right, top, bottom)
+    else
+        TomTom:SetCrazyArrowDirection(arrow_angle);
+    end
+end
+
+function addon.setArrowDistanceText(dist)
+    if dist then
+        local distance_text
+        if TomTom.GetFormattedDistance then
+            distance_text = TomTom:GetFormattedDistance(dist)
+        else
+            distance_text = floor(dist) .. " yards"
+        end
+
+        if doStick then
+            TomTom:SetCrazyArrowTitle("Sticky:" .. self.targetName, distance_text);
+        else
+            TomTom:SetCrazyArrowTitle(UnitName("target"), distance_text);
+        end
+    else
+        TomTom:SetCrazyArrowTitle("");
+    end
+end
+
+function addon:update_position()
+    if not self.playerInGroup or self.targetIsSelf then
+        return
+    end
+
+    local px, py, player_instance = HBD:GetPlayerWorldPosition()
+    local tx, ty, target_instance = HBD:GetUnitWorldPosition(target)
+    if (target_instance ~= player_instance) then
+        --print("Player and target is not in the same instance", player_instance, target_instance)
+        return
+    end
+
+    if (px and py and tx and ty ~= nil) then
+        local angle, distance = HBD:GetWorldVector(player_instance, px, py, tx, ty)
+
+        self.setArrowDirection(angle)
+        self.setArrowDistanceText(distance)
+    else
+        -- tx and ty can sometimes become nil if player zones into an instance while targeted
+        -- in which case we release the arrow.
+        self:disableUpdate()
+    end
 end
 
 ------------------------------------------------------------------
@@ -148,33 +211,8 @@ function GetWords(str, fs)
    end
 end
 
-function UpdateTomTomArrow()
-	if not TomTom:CrazyArrowIsHijacked() then
-		TomTom:HijackCrazyArrow(UpdateArrow())
-	end
-
-	UpdateArrow(self, elapsed);
-end
-
-function UpdateArrow()
-	local facing = GetPlayerFacing()
-	if facing == nil then
-		return -- TODO: Hide arrow?
-	end
-	local angle = HBD:GetWorldVector(player_instance, px, py, tx, ty)
-	local arrow_angle = facing - angle
-	arrow_angle = -arrow_angle
-	if TomTom.CrazyArrowThemeHandler ~= nil then
-		local theme = TomTom.CrazyArrowThemeHandler.active.tbl
-		local texture = theme.arrowTexture
-		local left, right, top, bottom = theme.navCoordResolver(arrow_angle)
-		texture:SetTexCoord(left, right, top, bottom)
-	else
-		TomTom:SetCrazyArrowDirection(arrow_angle);
-	end
-end
-
 function HighlightTargetOnMap(targetName)
+    local currentTarget = addon.targetName
 	for i=1, MAX_PARTY_MEMBERS, 1 do
 		if UnitExists("party"..i) then
 
@@ -226,17 +264,3 @@ function HighlightTargetOnMap(targetName)
 	end
 
 end
-
-frame:SetScript("OnEvent", function(_, event)
-	if event == 'PLAYER_TARGET_CHANGED' then
-		ttta_Player_Target_Changed()
-	end
-	if event == 'GROUP_LEFT' then
-		in_group = false
-		frame:SetScript("OnUpdate", nil)
-	elseif event == 'GROUP_JOINED' then
-		in_group = true
-		frame:SetScript("OnUpdate", update_position)
-	end
-
-end)
