@@ -151,7 +151,7 @@ function addon.setArrowDirection(angle)
     end
 end
 
-function addon.setArrowDistanceText(dist)
+function addon:setArrowDistanceText(dist)
     if dist then
         local distance_text
         if TomTom.GetFormattedDistance then
@@ -186,7 +186,7 @@ function addon:update_position()
         local angle, distance = HBD:GetWorldVector(player_instance, px, py, tx, ty)
 
         self.setArrowDirection(angle)
-        self.setArrowDistanceText(distance)
+        self:setArrowDistanceText(distance)
     else
         -- tx and ty can sometimes become nil if player zones into an instance while targeted
         -- in which case we release the arrow.
