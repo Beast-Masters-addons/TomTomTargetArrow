@@ -26,36 +26,25 @@ local TomTom = _G.TomTom
 
 
 ---------------------------------------------------------------------------------------------
--- SLASHCOMMAND STUFF
-local doStick = false;
-local target = "target";
 
-function TTTA_SlashCommand(msg)
-	if (msg) then
-		args = GetWords(msg, "^ *([^%s]+) *");
-
-		if (args[1] == "stick" and UnitName("target") ~= nil) then
-			doStick = true;
-			DEFAULT_CHAT_FRAME:AddMessage( "Stick on");
-			target = UnitName("target");
-		elseif (args[1] == "unstick") then
-			doStick = false;
-			DEFAULT_CHAT_FRAME:AddMessage( "Stick off");
-			target = "target";
-			-- Release arrow in case there is no target
-			TomTom:ReleaseCrazyArrow();
-		elseif (args[1] == "debug") then
-			print('HBD player: ', HBD:GetUnitWorldPosition("player"))
-			print('HBD target: ', HBD:GetUnitWorldPosition("target"))
-			print('UnitPosition', UnitPosition("player"))
+function addon:slashHandler(msg)
+    local arg1 = self:GetArgs(msg)
+	if arg1 then
+		if (arg1 == "stick" and self.targetName) then
+            self:Print("Stick on")
+            self.stickyTarget = self.targetName
+        elseif (arg1 == "unstick") then
+            self:Print("Stick off")
+            self.stickyTarget = nil
+            -- Release arrow in case there is no target
+            self:disableUpdate()
+		elseif (arg1 == "debug") then
+            self:Print('HBD player: ', HBD:GetUnitWorldPosition("player"))
+            self:Print('HBD target: ', HBD:GetUnitWorldPosition("target"))
+            self:Print('UnitPosition', UnitPosition("player"))
 		end
 	end
 end
-
--- Important detail: The below 3 lines have to be put after the definition of the function TTTA_SlashCommand to work.
-SLASH_TomTomTargetArrow1 = "/TomTomTargetArrow";
-SLASH_TomTomTargetArrow2 = "/ttta";
-SlashCmdList["TomTomTargetArrow"] = TTTA_SlashCommand;
 
 ---------------------------------------------------------------------------------------------
 -- EVENTS
@@ -68,13 +57,17 @@ end
 
 function addon:OnInitialize()
     self:RegisterEvent("PLAYER_TARGET_CHANGED")
+    self:RegisterEvent("PLAYER_FOCUS_CHANGED")
     self:RegisterEvent("GROUP_LEFT")
     self:RegisterEvent("GROUP_JOINED")
     self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
     self.playerInGroup = _G.UnitInAnyGroup("player")
     self.targetName = _G.UnitName("target")
     self.targetIsSelf = true
+    self.stickyTarget = nil
     self.metric = TomTom:RegionIsMetric() or false
+    self:RegisterChatCommand('TomTomTargetArrow', 'slashHandler')
+    self:RegisterChatCommand('ttta', 'slashHandler')
 end
 
 function addon:PLAYER_TARGET_CHANGED()
@@ -83,6 +76,9 @@ function addon:PLAYER_TARGET_CHANGED()
         self.targetIsSelf = true
     else
         self.targetIsSelf = UnitGUID(self.targetName) == UnitGUID("player")
+    end
+    if self.stickyTarget then
+        return
     end
 
     --print("Target", self.targetName, self.targetIsSelf, self:targetInGroup())
@@ -93,6 +89,19 @@ function addon:PLAYER_TARGET_CHANGED()
         self:enableUpdate()
     end
     HighlightTargetOnMap(self.targetName);
+end
+
+function addon:PLAYER_FOCUS_CHANGED()
+    self.stickyTarget = UnitName("focus")
+    if self.stickyTarget then
+        self:enableUpdate()
+        self:Printf("Sticky focus %s", self.stickyTarget)
+    else
+        if not self.targetName then
+            self:disableUpdate()
+        end
+        self:Print("Sticky focus off")
+    end
 end
 
 function addon:disableUpdate()
@@ -160,8 +169,8 @@ function addon:setArrowDistanceText(dist)
             distance_text = floor(dist) .. " yards"
         end
 
-        if doStick then
-            TomTom:SetCrazyArrowTitle("Sticky:" .. self.targetName, distance_text);
+        if self.stickyTarget then
+            TomTom:SetCrazyArrowTitle("Sticky: " .. self.stickyTarget, distance_text);
         else
             TomTom:SetCrazyArrowTitle(UnitName("target"), distance_text);
         end
@@ -171,12 +180,12 @@ function addon:setArrowDistanceText(dist)
 end
 
 function addon:update_position()
-    if not self.playerInGroup or self.targetIsSelf then
+    if not self.stickyTarget and (not self.playerInGroup or self.targetIsSelf) then
         return
     end
 
     local px, py, player_instance = HBD:GetPlayerWorldPosition()
-    local tx, ty, target_instance = HBD:GetUnitWorldPosition(target)
+    local tx, ty, target_instance = HBD:GetUnitWorldPosition(self.stickyTarget or self.targetName)
     if (target_instance ~= player_instance) then
         --print("Player and target is not in the same instance", player_instance, target_instance)
         return
