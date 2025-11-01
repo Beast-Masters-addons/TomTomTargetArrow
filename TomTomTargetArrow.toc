@@ -10,8 +10,13 @@
 ## X-Wago-ID: qv63zZNb
 
 #@no-lib-strip@
-libs\LibStub\LibStub.lua
-libs\CallbackHandler\CallbackHandler-1.0.xml
+libs\Ace3\LibStub\LibStub.lua
+libs\Ace3\CallbackHandler-1.0\CallbackHandler-1.0.xml
+libs\Ace3\AceAddon-3.0\AceAddon-3.0.xml
+libs\Ace3\AceEvent-3.0\AceEvent-3.0.xml
+libs\Ace3\AceLocale-3.0\AceLocale-3.0.xml
+libs\Ace3\AceConsole-3.0\AceConsole-3.0.xml
+
 libs\HereBeDragons\HereBeDragons-2.0.lua
 #@end-no-lib-strip@
 
