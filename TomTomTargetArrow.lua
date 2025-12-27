@@ -65,7 +65,6 @@ function addon:OnInitialize()
     self.targetName = _G.UnitName("target")
     self.targetIsSelf = true
     self.stickyTarget = nil
-    self.metric = TomTom:RegionIsMetric() or false
     self:RegisterChatCommand('TomTomTargetArrow', 'slashHandler')
     self:RegisterChatCommand('ttta', 'slashHandler')
 end
