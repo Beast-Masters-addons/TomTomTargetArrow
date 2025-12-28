@@ -103,6 +103,7 @@ function addon:PLAYER_FOCUS_CHANGED()
     end
 end
 
+-- luacheck: no self
 function addon:disableUpdate()
     TomTom:ReleaseCrazyArrow()
 end
