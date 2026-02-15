@@ -1,4 +1,4 @@
-## Interface: 110207, 50503, 11508, 40402, 30300, 20505
+## Interface: 120001, 50503, 11508, 40402, 30300, 20505
 ## Title: TomTom group member arrow
 ## Author: Bloodyhelln / Phelaan / datagutten
 ## Notes: Uses TomTom to show target location if target is in party or raid.
