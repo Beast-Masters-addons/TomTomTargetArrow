@@ -37,7 +37,7 @@ jobs:
       - name: WoW Packager
         uses: BigWigsMods/packager@v2
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: TomTomTargetArrow-${{ github.head_ref || github.ref_name }}
           path: ${{ github.workspace }}/.release
