@@ -62,15 +62,24 @@ function addon:OnInitialize()
     self:RegisterEvent("GROUP_JOINED")
     self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
     self.playerInGroup = _G.UnitInAnyGroup("player")
-    self.targetName = _G.UnitName("target")
+    self.targetName = self.getUnitName("target")
     self.targetIsSelf = true
     self.stickyTarget = nil
     self:RegisterChatCommand('TomTomTargetArrow', 'slashHandler')
     self:RegisterChatCommand('ttta', 'slashHandler')
 end
 
+function addon.getUnitName(unit)
+    local first_name, last_name = _G.UnitName(unit)
+    if last_name then
+        return first_name .. " " .. last_name
+    else
+        return first_name
+    end
+end
+
 function addon:PLAYER_TARGET_CHANGED()
-    self.targetName = UnitName("target")
+    self.targetName = self.getUnitName("target")
     if not self.targetName then
         self.targetIsSelf = true
     else
@@ -172,7 +181,7 @@ function addon:setArrowDistanceText(dist)
         if self.stickyTarget then
             TomTom:SetCrazyArrowTitle("Sticky: " .. self.stickyTarget, distance_text);
         else
-            TomTom:SetCrazyArrowTitle(UnitName("target"), distance_text);
+            TomTom:SetCrazyArrowTitle(self.getUnitName("target"), distance_text);
         end
     else
         TomTom:SetCrazyArrowTitle("");
